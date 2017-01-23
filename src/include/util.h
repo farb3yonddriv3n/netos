@@ -10,7 +10,7 @@ struct netos_s {
 	} input;
 };
 
-inline static void outb (int portnum, int data)
+inline static void outb(int portnum, int data)
 {
 	__asm__ __volatile__("outb %%al, %%dx" :: "a" (data),"d" (portnum));
 }
@@ -23,6 +23,21 @@ inline static unsigned char inb(int port)
 
 	return b;
 }
+
+inline static void outdw(unsigned short portnum, unsigned int data)
+{
+	__asm__ __volatile__("out %%eax, %%dx" :: "a" (data),"d" (portnum));
+}
+
+inline static unsigned int indw(unsigned short port)
+{
+	unsigned int b = 0;
+
+	__asm__ __volatile__("in %%dx, %%eax" : "=a" (b) : "d" (port));
+
+	return b;
+}
+
 
 #define flag_eq(m_dst, m_flag) ((m_dst & m_flag) == m_flag)
 #define flag_set(m_dst, m_flag) (m_dst |= m_flag)
