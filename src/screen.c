@@ -51,6 +51,11 @@ void k_screen_debug(char c)
 	*dst = c;
 }
 
+void k_screen_newline()
+{
+	offset += SCREEN_W - (offset % SCREEN_W);
+}
+
 void k_screen_string(char *src, int nsrc)
 {
 	int i;
