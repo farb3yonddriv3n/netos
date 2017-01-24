@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #ifndef SCREEN_H_
 #define SCREEN_H_
 
@@ -13,5 +18,6 @@ void k_screen_clear(const int w, const int c);
 void k_screen_char(char c);
 void k_screen_string(char *src, int nsrc);
 void k_screen_debug(char c);
+void k_screen_print(const char *src);
 
 #endif

@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #include <netos.h>
 
 typedef struct text_attr_st text_attr_t;
@@ -65,4 +70,11 @@ void k_screen_string(char *src, int nsrc)
 	}
 
 	update_cursor(0, offset);
+}
+
+void k_screen_print(const char *src)
+{
+	int len = strlen(src);
+
+	k_screen_string((char *)src, len);
 }
