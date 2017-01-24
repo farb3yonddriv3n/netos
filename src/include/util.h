@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #ifndef UTIL_H_
 #define UTIL_H_
 
@@ -8,6 +13,11 @@ struct netos_s {
 		char s[256];
 		int n;
 	} input;
+	struct {
+		unsigned int base;
+		unsigned int irq;
+		char mac[6];
+	} net;
 };
 
 inline static void outb(int portnum, int data)
