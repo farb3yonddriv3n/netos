@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #include <netos.h>
 
 static struct keyboard_map_s keyboard_layout[KEY_STROKES] = {
@@ -27,6 +32,8 @@ static struct keyboard_map_s keyboard_layout[KEY_STROKES] = {
 	{0x30, 'b', 0},
 	{0x31, 'n', 0},
 	{0x32, 'm', 0},
+	{0x1c, '\r', 0},
+	{0x0e, 0x8, 0},
 };
 
 unsigned char k_keyboard_input(struct netos_s *src)
@@ -38,6 +45,7 @@ unsigned char k_keyboard_input(struct netos_s *src)
 
 	for(i = 0; i < KEY_STROKES; i++) {
 		if(keyboard_layout[i].sc == c && !(flag_eq(keyboard_layout[i].flag, KEY_HELD))) {
+			k_screen_debug(keyboard_layout[i].sc);
 			src->input.down = keyboard_layout[i].ascii;
 			flag_set(keyboard_layout[i].flag, KEY_HELD);
 			flag_unset(keyboard_layout[i].flag, KEY_UP);
