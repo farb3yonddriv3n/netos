@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #include <netos.h>
 
 void swap_memory(char *dst, int ndst)
@@ -10,6 +15,16 @@ void swap_memory(char *dst, int ndst)
 		dst[j] = dst[i];
 		dst[i] = tmp;
 	}
+}
+
+void *memcpy(void *dst, const void *src, int nsrc)
+{
+	int i;
+	for(i = 0; i < nsrc; i++) {
+		((char *)(dst))[i] = ((char *)(src))[i];
+	}
+
+	return dst;
 }
 
 int int_to_str(char *dst, int ndst, int num)
@@ -52,4 +67,13 @@ int memcmp(const void *dst, const void *src, int nsrc)
 	}
 
 	return 0;
+}
+
+int strlen(const char *src)
+{
+	char *end;
+
+	for(end = src; *end != 0; end++);
+
+	return (end - src);
 }

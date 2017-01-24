@@ -1,3 +1,8 @@
+/* =============================================================================
+ * netOS -- 32-bit OS
+ * Copyright (C) 2017 Filip Pancik -- see LICENSE
+ * =============================================================================
+ */
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
@@ -7,5 +12,7 @@ void *memset(void *s, char c, int n);
 int memcmp(const void *dst, const void *src, int nsrc);
 void swap_memory(char *dst, int ndst);
 int int_to_str(char *dst, int ndst, int num);
+void *memcpy(void *dst, const void *src, int nsrc);
+int strlen(const char *src);
 
 #endif
