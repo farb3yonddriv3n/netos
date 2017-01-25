@@ -8,6 +8,13 @@
 #ifndef I8254X_H_
 #define I8254X_H_
 
+struct transmit_descriptor_s {
+	void *data_low;
+	void *data_high;
+	int length;
+	int base;
+};
+
 #define I8254X_MAX_PKT_SIZE	 16384
 
 // Register list

@@ -2,6 +2,7 @@
  * netOS -- 32-bit OS
  * Copyright (C) 2017 Filip Pancik -- see LICENSE
  *
+ * doc/drivers/8254x_GBe_SDM.pdf
  * http://wiki.osdev.org/Intel_8254x
  * BareMetal-OS/os/drivers/net/i8254x.asm
  * =============================================================================
@@ -10,7 +11,7 @@
 
 static void i8254x_init(struct netos_s *os, struct pci_s *p);
 static void i8254x_reset(struct netos_s *os);
-static void i8254x_transmit(struct netos_s *os);
+static void i8254x_transmit(struct netos_s *os, void *data, unsigned short n);
 static void i8254x_poll(struct netos_s *os);
 static void i8254x_ack_init(struct netos_s *os);
 
@@ -22,6 +23,9 @@ struct nic_s nic_i8254x = {
 	i8254x_poll,
 	i8254x_ack_init,
 };
+
+#define WL(m_offset, m_data) (*((unsigned int *)(os->net.base + m_offset)) = (m_data))
+#define RL(m_offset) (*((unsigned int *)(os->net.base + m_offset)))
 
 static void i8254x_init(struct netos_s *os, struct pci_s *p)
 {
@@ -50,8 +54,21 @@ static void i8254x_init(struct netos_s *os, struct pci_s *p)
 	MAC(4, 0x5404, 6);
 }
 
-static void i8254x_transmit(struct netos_s *os)
+static void i8254x_transmit(struct netos_s *os, void *data, unsigned short n)
 {
+	int len = n;
+	struct transmit_descriptor_s *t;
+
+	len |= (1<<24)|(1<<25)|(1<<27);
+
+	t = (struct transmit_descriptor_s *)k_eth_tx_buffer;
+	t->data_low = data;
+	t->data_high = NULL;
+	t->length = len;
+	t->base = os->net.base;
+
+	WL(I8254X_REG_TDH, 0x0);
+	WL(I8254X_REG_TDT, 0x1);
 }
 
 static void i8254x_poll(struct netos_s *os)
@@ -64,69 +81,75 @@ static void i8254x_ack_init(struct netos_s *os)
 
 static void i8254x_reset(struct netos_s *os)
 {
-
-#define R(m_offset, m_data) (*((int *)(os->net.base + m_offset)) = (m_data))
-
 	// disable interrupts
-	R(I8254X_REG_IMC, 0xFFFFFFFF);
+	WL(I8254X_REG_IMC, 0xFFFFFFFF);
 
 	// disable interrupt throttling logic
-	R(I8254X_REG_ITR, 0x0);
+	WL(I8254X_REG_ITR, 0x0);
 
 	// set RX buffer size to 48KB(TX buffer is calculated as 64 - RX)
-	R(I8254X_REG_PBA, 0x00000030);
+	WL(I8254X_REG_PBA, 0x00000030);
 
 	// TXCW: set ANE, TxConfigWord (Half/Full duplex, Next Page Request)
-	R(I8254X_REG_TXCW, 0x80008060);
+	WL(I8254X_REG_TXCW, 0x80008060);
 
 	// CTRL: clear LRST, set SLU and ASDE, clear RSTPHY, VME, and ILOS
-	*((unsigned int *)(os->net.base + I8254X_REG_CTRL)) &= 0x3fffff77;
+	int eax = RL(os->net.base + I8254X_REG_CTRL);
+	eax |= (1<<5) | (1<<6) | (1<<7);
+	eax &= ~((1<<3) | (1<<7) | (1<<30) | (1<<31));
+	WL(os->net.base + I8254X_REG_CTRL, eax);
 
 	// MTA reset
-	memset((void *)(os->net.base + 0x5200), 0x0, (4 * sizeof(int)));
+	memset((void *)(os->net.base + 0x5200), 0xFF, (4 * sizeof(int)));
 
 	// Receive Descriptor Base Address Low
-	R(I8254X_REG_RDBAL, (unsigned int)k_eth_rx_buffer);
+	WL(I8254X_REG_RDBAL, (unsigned int)k_eth_rx_buffer);
+
+	// Receive Descriptor Base Address High
+	WL(I8254X_REG_RDBAH, 0x0);
 
 	// Receive Descriptor Length
-	R(I8254X_REG_RDLEN, 32 * 16);
+	WL(I8254X_REG_RDLEN, 32 * 16);
 
 	// Receive Descriptor Head
-	R(I8254X_REG_RDH, 0x0);
+	WL(I8254X_REG_RDH, 0x0);
 
 	// Receive Descriptor Tail
-	R(I8254X_REG_RDT, 0x1);
+	WL(I8254X_REG_RDT, 0x1);
 
 	// Receiver Enable, Store Bad Packets, Broadcast Accept Mode, Strip Ethernet CRC from incoming packet
-	R(I8254X_REG_RCTL, 0x04008006);
+	WL(I8254X_REG_RCTL, 0x04008006);
 
 	*(int *)(k_eth_rx_buffer) = 0x1c9000;
 
 	// Transmit Descriptor Base Address Low
-	R(I8254X_REG_TDBAL, (unsigned int)k_eth_tx_buffer);
+	WL(I8254X_REG_TDBAL, (unsigned int)k_eth_tx_buffer);
+
+	// Transmit Descriptor Base Address High
+	WL(I8254X_REG_TDBAH, 0x0);
 
 	// Transmit Descriptor Length
-	R(I8254X_REG_TDLEN, 32 * 16);
+	WL(I8254X_REG_TDLEN, 32 * 16);
 
 	// Transmit Descriptor Head
-	R(I8254X_REG_TDH, 0x0);
+	WL(I8254X_REG_TDH, 0x0);
 
 	// Transmit Descriptor Tail
-	R(I8254X_REG_TDT, 0x0);
+	WL(I8254X_REG_TDT, 0x0);
 
 	// Enabled, Pad Short Packets, 15 retries, 64-byte COLD, Re-transmit on Late Collision
-	R(I8254X_REG_TCTL, 0x010400FA);
+	WL(I8254X_REG_TCTL, 0x010400FA);
 
 	// Transmit IPG Register
-	R(I8254X_REG_TIPG, 0x0060200A);
+	WL(I8254X_REG_TIPG, 0x0060200A);
 
 	// Clear the Receive Delay Timer Register
-	R(I8254X_REG_RDTR, 0x0);
+	WL(I8254X_REG_RDTR, 0x0);
 	// Clear the Receive Interrupt Absolute Delay Timer
-	R(I8254X_REG_RADV, 0x0);
+	WL(I8254X_REG_RADV, 0x0);
 	// Clear the Receive Small Packet Detect Interrupt
-	R(I8254X_REG_RSRPD,  0x0);
+	WL(I8254X_REG_RSRPD,  0x0);
 
 	// Enable interrupt types
-	R(I8254X_REG_IMS, 0x1FFFF);
+	WL(I8254X_REG_IMS, 0x1FFFF);
 }
