@@ -11,6 +11,11 @@ void parse_input(struct netos_s *src)
 		k_screen_string(NETOS_VERSION, NETOS_VERSION_N);
 	} else if(k_memcmp(src->input.s, src->input.n, CMD_HELP, CMD_HELP_N)) {
 		k_screen_string(CMD_COMMANDS, CMD_COMMANDS_N);
+	} else if(k_memcmp(src->input.s, src->input.n, CMD_ARP, CMD_ARP_N)) {
+		struct arp_s a;
+		build_arp(src, &a);
+		src->net.driver->transmit(src, (void *)&a, sizeof(a));
+		k_screen_print("ARP call");
 	}
 
 	k_screen_newline();
