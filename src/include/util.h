@@ -17,6 +17,7 @@ struct netos_s {
 		unsigned int base;
 		unsigned int irq;
 		char mac[6];
+		struct nic_s *driver;
 	} net;
 };
 
