@@ -12,8 +12,21 @@ static const struct nic_map_s nic_device_vendor_id[NIC_MAX];
 char k_eth_tx_buffer[1024 * 32];
 char k_eth_rx_buffer[1024 * 32];
 
-static void __stack_chk_fail()
+void __stack_chk_fail()
 {
+}
+
+void build_arp(struct netos_s *os, struct arp_s *a)
+{
+	memset(a, 0, sizeof(*a));
+
+	a->htype = 0x1;
+	a->ptype = 0x0800;
+	a->hlen = 6;
+	a->plen = 4;
+	a->opcode = 0x1;
+	memcpy(&a->srchw, os->net.mac, sizeof(os->net.mac));
+	k_screen_char(os->net.mac[0]);
 }
 
 static struct nic_s *cmp_device_vendor_id(const unsigned int dv_id)
@@ -49,7 +62,7 @@ static void browse_bus(struct pci_s *p)
 void network_init(struct netos_s *os)
 {
 	struct pci_s p;
-	struct nic_s *drv;
+	struct nic_s *nic;
 
 	browse_bus(&p);
 
@@ -58,15 +71,19 @@ void network_init(struct netos_s *os)
 		return;
 	}
 
-	drv = cmp_device_vendor_id(p.dv_id);
-	if(drv == NULL) {
+	nic = cmp_device_vendor_id(p.dv_id);
+	if(nic == NULL) {
 		k_screen_print("NIC not supported or not found");
 		return;
 	}
 
-	drv->init(os, &p);
+	os->net.driver = nic;
 
+	nic->init(os, &p);
 	k_screen_print("NIC initialized");
+
+	nic->reset(os);
+
 }
 
 static const struct nic_map_s nic_device_vendor_id[NIC_MAX] = {
