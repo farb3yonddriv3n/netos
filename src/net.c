@@ -18,15 +18,27 @@ void __stack_chk_fail()
 
 void build_arp(struct netos_s *os, struct arp_s *a)
 {
-	memset(a, 0, sizeof(*a));
+	memcpy(a->srchw_s, os->net.mac, sizeof(os->net.mac));
+	memset(a->dsthw_s, 0, sizeof(a->dsthw_s));
+	a->ptype_s = 0x0806;
 
+	swap_memory((void *)&a->ptype_s, sizeof(a->ptype_s));
 	a->htype = 0x1;
+	swap_memory((void *)&a->htype, sizeof(a->htype));
+
 	a->ptype = 0x0800;
+	swap_memory((void *)&a->ptype, sizeof(a->ptype));
+
 	a->hlen = 6;
 	a->plen = 4;
+
 	a->opcode = 0x1;
-	memcpy(&a->srchw, os->net.mac, sizeof(os->net.mac));
-	k_screen_char(os->net.mac[0]);
+	swap_memory((void *)&a->opcode, sizeof(a->opcode));
+
+	memcpy(a->srchw, os->net.mac, sizeof(os->net.mac));
+	memset(a->srcpr, 0, sizeof(a->srcpr));
+	memset(a->dsthw, 0, sizeof(a->dsthw));
+	memset(a->dstpr, 0, sizeof(a->dstpr));
 }
 
 static struct nic_s *cmp_device_vendor_id(const unsigned int dv_id)
@@ -83,7 +95,6 @@ void network_init(struct netos_s *os)
 	k_screen_print("NIC initialized");
 
 	nic->reset(os);
-
 }
 
 static const struct nic_map_s nic_device_vendor_id[NIC_MAX] = {
