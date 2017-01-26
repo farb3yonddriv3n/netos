@@ -73,10 +73,12 @@ static void i8254x_transmit(struct netos_s *os, void *data, unsigned short n)
 
 static void i8254x_poll(struct netos_s *os)
 {
+	(void )os;
 }
 
 static void i8254x_ack_init(struct netos_s *os)
 {
+	(void )os;
 }
 
 static void i8254x_reset(struct netos_s *os)

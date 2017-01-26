@@ -73,7 +73,7 @@ int strlen(const char *src)
 {
 	char *end;
 
-	for(end = src; *end != 0; end++);
+	for(end = (char *)src; *end != 0; end++);
 
 	return (end - src);
 }
