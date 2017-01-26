@@ -7,13 +7,11 @@
 
 typedef struct text_attr_st text_attr_t;
 
-char *screen_mem = (char *)0xb8000;
-static struct screen_region_s *screen = (struct screen_region_s *)0xb8000;
-static int offset = 0;
+static struct screen_s screen;
 
-static void update_cursor(int row, int col)
+static void update_cursor()
 {
-	unsigned short position = (row * 80) + col;
+	unsigned short position = screen.view.offset;
 
 	// cursor LOW port to vga INDEX register
 	outb(0x3D4, 0x0F);
@@ -23,45 +21,59 @@ static void update_cursor(int row, int col)
 	outb(0x3D5, (unsigned char )((position >> 8) & 0xFF));
 }
 
-inline static void display_char(char c)
+inline static void update()
 {
-	screen[offset].c = c;
-	screen[offset].attr = 0x07;
-	offset++;
+	update_cursor();
 }
 
-void k_screen_clear(const int w, const int c)
+inline static void display_char(char c)
 {
+	screen.view.port[screen.view.offset].c = c;
+	screen.view.port[screen.view.offset].attr = 0x7;
+	screen.view.offset++;
+}
+
+void k_screen_clear()
+{
+	unsigned short c = 0x0720;
 	int i;
 
-	for(i = 0; i < (w * c); i++) {
-		screen[i].c = ' ';
-		screen[i].attr = 5;
-	}
+	for(i = 0; i < (SCREEN_MAX / 2); i++)
+		memcpy(screen.view.port + i, &c, sizeof(c));
+	screen.view.offset = 0;
 
-	offset = 0;
-	update_cursor(0, 0);
+	update();
+}
+
+void k_screen_init()
+{
+	screen.view.offset = 0;
+	screen.view.port = (struct viewport_s *)0xb8000;
+
+	k_screen_clear();
 }
 
 void k_screen_char(char c)
 {
 	display_char(c);
-
-	update_cursor(0, offset);
+	update();
 }
 
 void k_screen_debug(char c)
 {
-	char *dst = (char *)(screen_mem + (80 * 24));
-	*dst = c;
+	(void )c;
 }
 
 void k_screen_newline()
 {
-	offset += SCREEN_W - (offset % SCREEN_W);
+	if(SCREEN_ROW(screen.view.offset) > 10) {
+		k_screen_clear();
+	}
+	screen.view.offset += SCREEN_W - (screen.view.offset % SCREEN_W);
+	update();
 }
 
-void k_screen_string(char *src, int nsrc)
+void k_screen_string(char *src, int nsrc, char newline)
 {
 	int i;
 
@@ -69,12 +81,15 @@ void k_screen_string(char *src, int nsrc)
 		display_char(src[i]);
 	}
 
-	update_cursor(0, offset);
+	if(newline == 1)
+		k_screen_newline();
+
+	update();
 }
 
 void k_screen_print(const char *src)
 {
 	int len = strlen(src);
 
-	k_screen_string((char *)src, len);
+	k_screen_string((char *)src, len, 1);
 }
