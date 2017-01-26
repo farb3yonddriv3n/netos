@@ -14,6 +14,9 @@
 #define CMD_HELP 			"help"
 #define CMD_HELP_N			SZ(CMD_HELP)
 
+#define CMD_CLEAR 			"clear"
+#define CMD_CLEAR_N			SZ(CMD_CLEAR)
+
 #define CMD_ARP 			"arp"
 #define CMD_ARP_N			SZ(CMD_ARP)
 
