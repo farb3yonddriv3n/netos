@@ -10,7 +10,7 @@ void kernel_init(void) {
 
 	memset(&r, 0, sizeof(r));
 
-	k_screen_clear(SCREEN_W, SCREEN_H);
+	k_screen_init();
 
 	network_init(&r);
 
