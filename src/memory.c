@@ -8,12 +8,11 @@
 void swap_memory(char *dst, int ndst)
 {
 	int i, j;
-	unsigned char tmp;
 
 	for(i = 0, j = ndst - 1; (i < (ndst / 2) && j > 0); i++, j--) {
-		tmp = dst[j];
-		dst[j] = dst[i];
-		dst[i] = tmp;
+		dst[j] ^= dst[i];
+		dst[i] ^= dst[j];
+		dst[j] ^= dst[i];
 	}
 }
 
