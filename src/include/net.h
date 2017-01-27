@@ -15,7 +15,7 @@ struct nic_s {
 	void (*reset)(struct netos_s *os);
 	void (*transmit)(struct netos_s *os, void *data, unsigned short n);
 	void (*poll)(struct netos_s *os);
-	void (*ack_init)(struct netos_s *os);
+	int (*ack_init)(struct netos_s *os);
 };
 
 struct nic_map_s {

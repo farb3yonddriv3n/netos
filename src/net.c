@@ -16,6 +16,11 @@ void __stack_chk_fail()
 {
 }
 
+void network_callback()
+{
+	k_screen_print("network callback");
+}
+
 void build_arp(struct netos_s *os, struct arp_s *a)
 {
 	memcpy(a->srchw_s, os->net.mac, sizeof(os->net.mac));
@@ -92,9 +97,13 @@ void network_init(struct netos_s *os)
 	os->net.driver = nic;
 
 	nic->init(os, &p);
+
 	k_screen_print("NIC initialized");
 
 	nic->reset(os);
+
+	k_create_gate(network_callback, os->net.irq + 0x20);
+	k_pic_mask_clear(os->net.irq);
 }
 
 static const struct nic_map_s nic_device_vendor_id[NIC_MAX] = {

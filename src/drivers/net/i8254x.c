@@ -13,7 +13,7 @@ static void i8254x_init(struct netos_s *os, struct pci_s *p);
 static void i8254x_reset(struct netos_s *os);
 static void i8254x_transmit(struct netos_s *os, void *data, unsigned short n);
 static void i8254x_poll(struct netos_s *os);
-static void i8254x_ack_init(struct netos_s *os);
+static int i8254x_ack_init(struct netos_s *os);
 
 struct nic_s nic_i8254x = {
 	"I8254X",
@@ -73,12 +73,18 @@ static void i8254x_transmit(struct netos_s *os, void *data, unsigned short n)
 
 static void i8254x_poll(struct netos_s *os)
 {
-	(void )os;
+	os->net.received.len = *(unsigned int *)(k_eth_rx_buffer + 8);
+	memcpy(os->net.received.buf, (void *)0x1c9000, os->net.received.len);
+
+	WL(I8254X_REG_RDH, 0x0);
+	WL(I8254X_REG_RDT, 0x1);
+
+	*(unsigned int *)(k_eth_rx_buffer) = 0x1c9000;
 }
 
-static void i8254x_ack_init(struct netos_s *os)
+static int i8254x_ack_init(struct netos_s *os)
 {
-	(void )os;
+	return (RL(os->net.base + I8254X_REG_ICR));
 }
 
 static void i8254x_reset(struct netos_s *os)
