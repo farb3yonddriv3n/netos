@@ -24,6 +24,8 @@ void parse_input(struct netos_s *src)
 		k_screen_print("ARP dummy call");
 	} else if(k_memcmp(src->input.s, src->input.n, CMD_CLEAR, CMD_CLEAR_N)) {
 		k_screen_clear();
+	} else if(k_memcmp(src->input.s, src->input.n, CMD_EXIT, CMD_EXIT_N)) {
+		flag_set(src->flag, FN_EXIT);
 	} else {
 		k_screen_print("command not found");
 	}

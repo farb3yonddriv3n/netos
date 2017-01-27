@@ -8,6 +8,9 @@
 
 #define SZ(m_d) (sizeof(m_d) - 1)
 
+#define CMD_EXIT 		"exit"
+#define CMD_EXIT_N		SZ(CMD_EXIT)
+
 #define CMD_VERSION 		"version"
 #define CMD_VERSION_N		SZ(CMD_VERSION)
 
