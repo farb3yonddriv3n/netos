@@ -35,13 +35,17 @@ struct netos_s {
 
 #include <util.h>
 #include <types.h>
-#include <memory.h>
 #include <cli.h>
-#include <screen.h>
-#include <keyboard.h>
-#include <pci.h>
-#include <net.h>
-#include <i8254x.h>
+
+#include <syscalls/screen.h>
+#include <syscalls/keyboard.h>
+#include <syscalls/pci.h>
+#include <syscalls/memory.h>
+
+#include <init/descriptor_tables.h>
+#include <init/net.h>
+
+#include <drivers/net/i8254x.h>
 
 #define FN_EXIT		0x1
 
