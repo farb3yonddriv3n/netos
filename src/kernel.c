@@ -5,7 +5,7 @@
  */
 #include <netos.h>
 
-#define WW(m_dst, m_src) (*(unsigned short *)m_dst = m_src)
+#define WW(m_dst, m_src) (*(unsigned int *)m_dst = m_src)
 
 void k_pic_mask_clear(unsigned char irq)
 {
@@ -25,19 +25,6 @@ void k_pic_mask_clear(unsigned char irq)
 	outb(dx, ax);
 }
 
-void k_create_gate(void *handler, unsigned int gate)
-{
-	unsigned int h;
-
-	h = (unsigned int )handler;
-
-	gate <<= 4;
-	WW(gate, (unsigned short )h);
-	gate += 4;
-	h >>= 16;
-	WW(gate, (unsigned short )h);
-}
-
 void kernel_init(void)
 {
 	struct netos_s r;
@@ -45,6 +32,8 @@ void kernel_init(void)
 	memset(&r, 0, sizeof(r));
 
 	k_screen_init();
+
+	init_descriptor_tables();
 
 	network_init(&r);
 
