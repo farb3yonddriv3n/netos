@@ -105,4 +105,6 @@ extern void irq13(void);
 extern void irq14(void);
 extern void irq15(void);
 
+void idt_set_gate(unsigned char n, unsigned int base, unsigned short sel, unsigned char flags);
+
 #endif /* ndef DESCRIPTOR_TABLES_H */

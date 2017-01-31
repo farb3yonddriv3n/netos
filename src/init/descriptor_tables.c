@@ -20,7 +20,7 @@ static void	gdt_set_gate(unsigned int n, unsigned int base, unsigned int limit,
 
 extern void	idt_flush(unsigned int idt_p);
 static void	init_idt(void);
-static void	idt_set_gate(unsigned int n, unsigned int base, unsigned short sel,
+void	idt_set_gate(unsigned char n, unsigned int base, unsigned short sel,
 		unsigned char flags);
 
 static struct gdt_entry_s		gdt_entries[5];
@@ -34,10 +34,11 @@ void isr_handler(struct registers_s regs)
 	k_screen_print("recieved interrupt:");		//regs.int_no
 }
 
-void irq_handler(struct registers_s regs) 
+void irq_handler(struct registers_s regs)
 {
 	(void )regs;
 	k_screen_print("irq handler");
+
 	/* Send reset signal to master. */
 	/*
 	   if (regs.int_no >= 40) {
@@ -72,11 +73,11 @@ static void init_gdt(void)
 	gdt_flush((unsigned int)&gdt_ptr);
 }
 
-
 static void gdt_set_gate(unsigned int n, unsigned int base, unsigned int limit, unsigned char access, unsigned char gran)
 {
 	if(n >= NELEM(gdt_entries)) {
 		k_screen_print("bad gd entries index");
+		return;
 	}
 
 	gdt_entries[n].ge_base_lo = (base & 0xFFFF);
@@ -92,6 +93,7 @@ static void gdt_set_gate(unsigned int n, unsigned int base, unsigned int limit, 
 
 static void init_idt(void)
 {
+	int i;
 	idt_ptr.ip_limit = sizeof(idt_entries) - 1;
 	idt_ptr.ip_base  = (unsigned int)&idt_entries;
 
@@ -142,32 +144,16 @@ static void init_idt(void)
 	idt_set_gate(29, (unsigned int)isr29, 0x08, 0x8E);
 	idt_set_gate(30, (unsigned int)isr30, 0x08, 0x8E);
 	idt_set_gate(31, (unsigned int)isr31, 0x08, 0x8E);
-	idt_set_gate(32,  (unsigned int)irq0, 0x08, 0x8E);
-	idt_set_gate(33,  (unsigned int)irq1, 0x08, 0x8E);
-	idt_set_gate(34,  (unsigned int)irq2, 0x08, 0x8E);
-	idt_set_gate(35,  (unsigned int)irq3, 0x08, 0x8E);
-	idt_set_gate(36,  (unsigned int)irq4, 0x08, 0x8E);
-	idt_set_gate(37,  (unsigned int)irq5, 0x08, 0x8E);
-	idt_set_gate(38,  (unsigned int)irq6, 0x08, 0x8E);
-	idt_set_gate(39,  (unsigned int)irq7, 0x08, 0x8E);
-	idt_set_gate(40,  (unsigned int)irq8, 0x08, 0x8E);
-	idt_set_gate(41,  (unsigned int)irq9, 0x08, 0x8E);
-	idt_set_gate(42, (unsigned int)irq10, 0x08, 0x8E);
-	idt_set_gate(43, (unsigned int)irq11, 0x08, 0x8E);
-	idt_set_gate(44, (unsigned int)irq12, 0x08, 0x8E);
-	idt_set_gate(45, (unsigned int)irq13, 0x08, 0x8E);
-	idt_set_gate(46, (unsigned int)irq14, 0x08, 0x8E);
-	idt_set_gate(47, (unsigned int)irq15, 0x08, 0x8E);
+
+	for(i = 32; i < (unsigned char )(NELEM(idt_entries)); i++) {
+		idt_set_gate(i,  (unsigned int)irq0, 0x08, 0x8E);
+	}
 
 	idt_flush((unsigned int)&idt_ptr);
 }
 
-static void idt_set_gate(unsigned int n, unsigned int base, unsigned short sel, unsigned char flags)
+void idt_set_gate(unsigned char n, unsigned int base, unsigned short sel, unsigned char flags)
 {
-	if(n >= NELEM(idt_entries)) {
-		k_screen_print("Bad idt entries index");
-	}
-
 	idt_entries[n].ie_base_lo = base & 0xFFFF;
 	idt_entries[n].ie_base_hi = (base >> 16) & 0xFFFF;
 
