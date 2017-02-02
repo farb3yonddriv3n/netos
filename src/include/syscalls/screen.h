@@ -33,5 +33,6 @@ void k_screen_string(char *src, int nsrc, char newline);
 void k_screen_debug(char c);
 void k_screen_print(const char *src);
 void k_screen_newline();
+void k_screen_int(int n, char newline);
 
 #endif

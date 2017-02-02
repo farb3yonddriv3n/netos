@@ -87,6 +87,13 @@ void k_screen_string(char *src, int nsrc, char newline)
 	update();
 }
 
+void k_screen_int(int n, char newline)
+{
+	char tmp[16];
+	int len = int_to_str(tmp, sizeof(tmp), n);
+	k_screen_string(tmp, len, newline);
+}
+
 void k_screen_print(const char *src)
 {
 	int len = strlen(src);
