@@ -41,6 +41,7 @@ struct netos_s {
 #include <syscalls/keyboard.h>
 #include <syscalls/pci.h>
 #include <syscalls/memory.h>
+#include <syscalls/pic.h>
 
 #include <init/descriptor_tables.h>
 #include <init/net.h>

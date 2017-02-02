@@ -19,5 +19,6 @@ struct pci_s {
 
 unsigned int k_pci_read_reg(unsigned char bus, unsigned char device, unsigned char reg);
 void k_pci_write_reg(unsigned char bus, unsigned char device, unsigned char reg, unsigned int data);
+void io_wait(void);
 
 #endif
