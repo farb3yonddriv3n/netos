@@ -37,7 +37,7 @@ static void i8254x_init(struct netos_s *os, struct pci_s *p)
 	os->net.base = (k_pci_read_reg(p->bus, p->dev, 0x4) & 0xFFFFFFF0);
 
 	// get IRQ
-	os->net.irq = k_pci_read_reg(p->bus, p->dev, 0x0F);
+	os->net.irq = (unsigned char )k_pci_read_reg(p->bus, p->dev, 0x0F);
 
 	// enable pci bus mastering
 	status_command = k_pci_read_reg(p->bus, p->dev, 0x1);

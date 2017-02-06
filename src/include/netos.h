@@ -21,7 +21,7 @@ struct netos_s {
 	} input;
 	struct {
 		unsigned int base;
-		unsigned int irq;
+		unsigned char irq;
 		char mac[6];
 		struct nic_s *driver;
 		struct {

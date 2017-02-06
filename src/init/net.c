@@ -104,9 +104,9 @@ void network_init(struct netos_s *os)
 
 	nic->reset(os);
 
-	idt_set_gate((unsigned char)((os->net.irq & 0x0F) + 0x20), (unsigned int)network_callback, 0x08, 0x8E);
+	idt_set_gate(os->net.irq, (unsigned int)network_callback, 0x08, 0x8E);
+	pic_irq_clear_mask(os->net.irq);
 
-	k_pic_mask_clear(os->net.irq);
 	os->net.driver->ack_init(os);
 }
 
