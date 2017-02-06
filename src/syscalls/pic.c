@@ -22,7 +22,7 @@ void pic_eoi(unsigned char irq)
 /* To use the processor local APIC and the IOAPIC, disable the PIC first */
 void pic_disable()
 {
-	outb(PIC2_DATA, PIC_EOI);
+	outb(PIC1_DATA, PIC_EOI);
 	outb(PIC2_DATA, PIC_EOI);
 }
 
