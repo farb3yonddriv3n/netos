@@ -5,6 +5,57 @@
  */
 #include <netos.h>
 
+struct cli_map_s {
+	const char *cmd;
+	int ncmd;
+	void (*func)(struct netos_s *s);
+};
+
+static void cli_version(struct netos_s *src);
+static void cli_help(struct netos_s *src);
+static void cli_arp(struct netos_s *src);
+static void cli_clear(struct netos_s *src);
+static void cli_exit(struct netos_s *src);
+
+static struct cli_map_s cli_map[] = {
+	{CMD_VERSION, CMD_VERSION_N, cli_version},
+	{CMD_HELP, CMD_HELP_N, cli_help},
+	{CMD_ARP, CMD_ARP_N, cli_arp},
+	{CMD_CLEAR, CMD_CLEAR_N, cli_clear},
+	{CMD_EXIT, CMD_EXIT_N, cli_exit}
+};
+
+static void cli_version(struct netos_s *src)
+{
+	(void )src;
+	k_screen_string(NETOS_VERSION, NETOS_VERSION_N, 1);
+}
+
+static void cli_help(struct netos_s *src)
+{
+	(void )src;
+	k_screen_string(CMD_COMMANDS, CMD_COMMANDS_N, 1);
+}
+
+static void cli_arp(struct netos_s *src)
+{
+	struct arp_s a;
+	build_arp(src, &a);
+	src->net.driver->transmit(src, (void *)&a, sizeof(a));
+	k_screen_print("ARP dummy call");
+}
+
+static void cli_clear(struct netos_s *src)
+{
+	(void )src;
+	k_screen_clear();
+}
+
+static void cli_exit(struct netos_s *src)
+{
+	flag_set(src->flag, FN_EXIT);
+}
+
 void parse_input(struct netos_s *src)
 {
 	k_screen_newline();
@@ -13,22 +64,16 @@ void parse_input(struct netos_s *src)
 		return;
 	}
 
-	if(k_memcmp(src->input.s, src->input.n, CMD_VERSION, CMD_VERSION_N)) {
-		k_screen_string(NETOS_VERSION, NETOS_VERSION_N, 1);
-	} else if(k_memcmp(src->input.s, src->input.n, CMD_HELP, CMD_HELP_N)) {
-		k_screen_string(CMD_COMMANDS, CMD_COMMANDS_N, 1);
-	} else if(k_memcmp(src->input.s, src->input.n, CMD_ARP, CMD_ARP_N)) {
-		struct arp_s a;
-		build_arp(src, &a);
-		src->net.driver->transmit(src, (void *)&a, sizeof(a));
-		k_screen_print("ARP dummy call");
-	} else if(k_memcmp(src->input.s, src->input.n, CMD_CLEAR, CMD_CLEAR_N)) {
-		k_screen_clear();
-	} else if(k_memcmp(src->input.s, src->input.n, CMD_EXIT, CMD_EXIT_N)) {
-		flag_set(src->flag, FN_EXIT);
-	} else {
-		k_screen_print("command not found");
+	int i;
+
+	for(i = 0; i < size(cli_map); i++) {
+		if(k_memcmp(src->input.s, src->input.n, cli_map[i].cmd, cli_map[i].ncmd)) {
+			cli_map[i].func(src);
+			return;
+		}
 	}
+
+	k_screen_print("command not found");
 }
 
 void k_cli(struct netos_s *src)

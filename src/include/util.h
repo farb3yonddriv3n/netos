@@ -34,6 +34,7 @@ inline static unsigned int indw(unsigned short port)
 	return b;
 }
 
+#define size(m_x) ((int )(sizeof(m_x) / sizeof(m_x[0])))
 
 #define flag_eq(m_dst, m_flag) ((m_dst & m_flag) == m_flag)
 #define flag_set(m_dst, m_flag) (m_dst |= m_flag)
