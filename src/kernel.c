@@ -5,22 +5,25 @@
  */
 #include <netos.h>
 
+struct netos_s netos;
+
 void kernel_init(void)
 {
-	struct netos_s r;
+	asm("sti;");
 
-	memset(&r, 0, sizeof(r));
+	memset(&netos, 0, sizeof(netos));
 
 	k_screen_init();
 
 	init_descriptor_tables();
 
-	network_init(&r);
+	pic_irq_set_mask(1);	// keyboard
 
-	while(!flag_eq(r.flag, FN_EXIT)) {
-		k_cli(&r);
-	}
+	network_init(&netos);
 
+	while(!flag_eq(netos.flag, FN_EXIT));
+
+	asm("cli;");
 	k_screen_print("Turn off now");
 	for(;;) __asm("hlt");
 }
