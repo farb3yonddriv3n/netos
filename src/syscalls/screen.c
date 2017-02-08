@@ -35,11 +35,12 @@ inline static void display_char(char c)
 
 void k_screen_clear()
 {
-	unsigned short c = 0x0720;
 	int i;
 
-	for(i = 0; i < (SCREEN_MAX / 2); i++)
-		memcpy(screen.view.port + i, &c, sizeof(c));
+	for(i = 0; i < SCREEN_MAX; ) {
+		((char *)screen.view.port)[i++] = 0x20;
+		((char *)screen.view.port)[i++] = 7;
+	}
 	screen.view.offset = 0;
 
 	update();
