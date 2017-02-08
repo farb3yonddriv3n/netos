@@ -31,6 +31,11 @@ int int_to_str(char *dst, int ndst, int num)
 	int i = 0;
 	unsigned char r;
 
+	if(num == 0) {
+		dst[0] = '0';
+		return 1;
+	}
+
 	for(i = 0; (num > 0 && ndst > 0); i++, ndst--) {
 		r = num % 10;
 		num /= 10;
