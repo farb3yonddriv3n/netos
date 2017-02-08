@@ -36,19 +36,20 @@ static struct keyboard_map_s keyboard_layout[KEY_STROKES] = {
 	{0x0e, 0x8, 0},
 };
 
-unsigned char k_keyboard_input(struct netos_s *src)
+void k_keyboard_input()
 {
 	unsigned char c = inb(0x60);
 	int i = 0;
 
-	src->input.down = 0;
+	netos.input.down = 0;
 
 	for(i = 0; i < KEY_STROKES; i++) {
 		if(keyboard_layout[i].sc == c && !(flag_eq(keyboard_layout[i].flag, KEY_HELD))) {
 			k_screen_debug(keyboard_layout[i].sc);
-			src->input.down = keyboard_layout[i].ascii;
+			netos.input.down = keyboard_layout[i].ascii;
 			flag_set(keyboard_layout[i].flag, KEY_HELD);
 			flag_unset(keyboard_layout[i].flag, KEY_UP);
+			k_cli(&netos);
 			break;
 		} else if((keyboard_layout[i].sc | SC_BREAK) == c && flag_eq(keyboard_layout[i].flag, KEY_HELD)) {
 			flag_unset(keyboard_layout[i].flag, KEY_HELD);
@@ -56,6 +57,4 @@ unsigned char k_keyboard_input(struct netos_s *src)
 			break;
 		}
 	}
-
-	return src->input.down;
 }
