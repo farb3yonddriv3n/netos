@@ -44,20 +44,20 @@ void isr_handler(struct registers_s regs)
 }
 
 /* This gets called from our ASM interrupt handler stub. */
-void irq_handler(struct registers_s regs) {
-	/* Send an EOI (end of interrupt) signal to the PICs. If this interrupt
-	   involved the slave. */
-	if (regs.int_no >= 40) {
-		/* Send reset signal to slave.*/
-		outb(0xA0, 0x20);
+void irq_handler(struct registers_s regs)
+{
+	switch(regs.int_no - 0x20) {
+		case 1: {
+			k_keyboard_input();
+		}
+		break;
+		default: {
+			k_screen_print("default");
+		}
+		break;
 	}
-	/* Send reset signal to master. */
-	outb(0x20, 0x20);
 
-	if (interrupt_handlers[regs.int_no] != 0) {
-		isrhdl_t handler = interrupt_handlers[regs.int_no];
-		handler(regs);
-	}
+	pic_eoi(regs.int_no - 0x20);
 }
 
 void register_interrupt_handler(unsigned int n, isrhdl_t handler)
