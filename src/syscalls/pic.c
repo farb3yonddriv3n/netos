@@ -12,7 +12,11 @@
  */
 void pic_eoi(unsigned char irq)
 {
-	if(irq >= 8) {
+	if(irq < 0 || irq > 15) {
+		return;
+	}
+
+	if((irq >= 8 && irq < 16) || irq == 2) {
 		outb(PIC2_COMMAND, PIC_EOI);
 	}
 
@@ -28,10 +32,10 @@ void pic_disable()
 
 void pic_remap(int offset1, int offset2)
 {
-	unsigned char a1, a2;
+	//unsigned char a1, a2;
 
-	a1 = inb(PIC1_DATA);                        // save masks
-	a2 = inb(PIC2_DATA);
+	//a1 = inb(PIC1_DATA);                        // save masks
+	//a2 = inb(PIC2_DATA);
 
 	outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
 	io_wait();
@@ -51,8 +55,8 @@ void pic_remap(int offset1, int offset2)
 	outb(PIC2_DATA, ICW4_8086);
 	io_wait();
 
-	outb(PIC1_DATA, a1);   // restore saved masks.
-	outb(PIC2_DATA, a2);
+	outb(PIC1_DATA, 0xFF);   // restore saved masks.
+	outb(PIC2_DATA, 0xFF);
 }
 
 void pic_irq_set_mask(unsigned char irq_line)
@@ -60,13 +64,15 @@ void pic_irq_set_mask(unsigned char irq_line)
 	unsigned short port;
 	unsigned char value;
 
+	k_screen_print("enabled irq");
+	k_screen_int(irq_line, 1);
 	if(irq_line < 8) {
 		port = PIC1_DATA;
 	} else {
 		port = PIC2_DATA;
 		irq_line -= 8;
 	}
-	value = inb(port) | (1 << irq_line);
+	value = inb(port) & ~(1 << irq_line);
 	outb(port, value);
 }
 
@@ -81,6 +87,6 @@ void pic_irq_clear_mask(unsigned char irq_line)
 		port = PIC2_DATA;
 		irq_line -= 8;
 	}
-	value = inb(port) & ~(1 << irq_line);
+	value = inb(port) | (1 << irq_line);
 	outb(port, value);
 }
