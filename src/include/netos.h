@@ -50,4 +50,6 @@ struct netos_s {
 
 #define FN_EXIT		0x1
 
+extern struct netos_s netos;
+
 #endif

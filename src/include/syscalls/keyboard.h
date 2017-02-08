@@ -21,6 +21,6 @@ enum key_e {
 	KEY_PROMPT =    (1<<3),
 };
 
-unsigned char k_keyboard_input(struct netos_s *src);
+void k_keyboard_input();
 
 #endif
