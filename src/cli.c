@@ -41,8 +41,12 @@ static void cli_arp(struct netos_s *src)
 {
 	struct arp_s a;
 	build_arp(src, &a);
-	src->net.driver->transmit(src, (void *)&a, sizeof(a));
-	k_screen_print("ARP dummy call");
+	if(src->net.driver) {
+		src->net.driver->transmit(src, (void *)&a, sizeof(a));
+		k_screen_print("ARP dummy call");
+	} else {
+		k_screen_print("nic not initialized");
+	}
 }
 
 static void cli_clear(struct netos_s *src)
@@ -82,12 +86,11 @@ void k_cli(struct netos_s *src)
 
 	// display prompt
 	if(!flag_eq(src->input.flag, KEY_PROMPT)) {
-		char *prompt = "> ";
-		k_screen_string(prompt, 2, 0);
+		k_screen_string("> ", 2, 0);
 		flag_set(src->input.flag, KEY_PROMPT);
 	}
 
-	c = k_keyboard_input(src);
+	c = src->input.down;
 
 	if(c == '\r') {
 		flag_unset(src->input.flag, KEY_PROMPT);
