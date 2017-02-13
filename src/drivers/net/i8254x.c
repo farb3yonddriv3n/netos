@@ -92,6 +92,9 @@ static void i8254x_reset(struct netos_s *os)
 	// disable interrupts
 	WL(I8254X_REG_IMC, 0xFFFFFFFF);
 
+	// clear any pending interrupts
+	i8254x_ack_init(os);
+
 	// disable interrupt throttling logic
 	WL(I8254X_REG_ITR, 0x0);
 
@@ -103,7 +106,7 @@ static void i8254x_reset(struct netos_s *os)
 
 	// CTRL: clear LRST, set SLU and ASDE, clear RSTPHY, VME, and ILOS
 	int eax = RL(os->net.base + I8254X_REG_CTRL);
-	eax |= (1<<5) | (1<<6) | (1<<7);
+	eax |= (1<<5) | (1<<6);
 	eax &= ~((1<<3) | (1<<7) | (1<<30) | (1<<31));
 	WL(os->net.base + I8254X_REG_CTRL, eax);
 
