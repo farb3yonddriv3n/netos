@@ -12,7 +12,7 @@
  */
 void pic_eoi(unsigned char irq)
 {
-	if(irq < 0 || irq > 15) {
+	if(irq > 15) {
 		return;
 	}
 
