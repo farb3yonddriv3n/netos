@@ -30,7 +30,7 @@ all:
 	python build.py
 
 clean:
-	rm -rf bin/
+	rm -rf bin/ kernel* os_* Stage1PXE Stage1FDD Stage2
 
 run:
 	#qemu-system-i386 -net nic,model=e1000 -net dump,file=/tmp/vm0.pcap -net user os_fdd.img
